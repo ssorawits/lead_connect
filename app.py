@@ -407,7 +407,7 @@ def ic_dashboard(user: dict):
 #     with c1:
 #         st.write(f"**ประเภท:** {campaign['campaign_type']}")
 #         st.write(f"**รายละเอียด:** {campaign['description']}")
-#         st.write(f"**ระยะเวลา:** {campaign['start_date']} ถึง {campaign['end_date']}")
+#         st.write(f"**:** {campaign['start_date']} ถึง {campaign['end_date']}")
 #         st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
 #     # Leads table for this IC
@@ -551,7 +551,7 @@ def campaign_detail_ic(user, campaign_id):
     with colA:
         st.write(f"**ประเภท:** {campaign['campaign_type']}")
         st.write(f"**รายละเอียด:** {campaign['description']}")
-        st.write(f"**ระยะเวลา:** {campaign['start_date']} ถึง {campaign['end_date']}")
+        st.write(f"**ระยะเวลาติดต่อลูกค้า:** {campaign['start_date']} ถึง {campaign['end_date']}")
         #st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
     # --- filter controls ---
@@ -1057,7 +1057,7 @@ def manage_campaigns_admin(user: dict):
             with st.expander(f"{campaign['campaign_id']} - {campaign['campaign_name']} ({campaign['campaign_type']})", expanded=False):
                 st.write(f"**Campaign ID:** {campaign['campaign_id']}")
                 st.write(f"**รายละเอียด:** {campaign['description']}")
-                st.write(f"**ระยะเวลา:** {campaign['start_date']} ถึง {campaign['end_date']}")
+                st.write(f"**ระยะเวลาติดต่อลูกค้า:** {campaign['start_date']} ถึง {campaign['end_date']}")
                 #st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
                 campaign_leads = leads_df[leads_df['campaign_id'] == campaign['campaign_id']]
