@@ -415,7 +415,7 @@ def ic_dashboard(user: dict):
 #     c1, c2 = st.columns([2, 1])
 #     with c1:
 #         st.write(f"**ประเภท:** {campaign['campaign_type']}")
-#         st.write(f"**รายละเอียด:** {campaign['description']}")
+#         
 #         st.write(f"**:** {campaign['start_date']} ถึง {campaign['end_date']}")
 #         st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
@@ -1051,7 +1051,7 @@ def manage_campaigns_admin(user: dict):
 
                 clear_add_campaign_form()  # clear inputs but keep success & last campaign info
                 st.session_state['add_campaign_success'] = True
-                st.rerun()
+                #st.rerun()
 
     # ---------- TAB 2: MANAGE CAMPAIGNS ----------
     with tab2:
@@ -1114,7 +1114,7 @@ def manage_campaigns_admin(user: dict):
                                 except Exception:
                                     pass
                                 st.success("✅ แก้ไข Campaign สำเร็จ")
-                                st.rerun()
+                                #st.rerun()
 
                         with st.form(key=f"delete_{campaign['campaign_id']}"):
                             st.write("### ลบ Campaign")
@@ -1134,7 +1134,7 @@ def manage_campaigns_admin(user: dict):
                                     except Exception:
                                         pass
                                     st.success("🗑️ ลบ Campaign และ Lead สำเร็จ")
-                                    st.rerun()
+                                    #st.rerun()
                                 else:
                                     st.error("ชื่อ Campaign ไม่ตรงกัน")
                     elif password_input:
