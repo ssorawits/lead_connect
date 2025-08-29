@@ -259,134 +259,53 @@ def ic_dashboard(user: dict):
         st.plotly_chart(fig, use_container_width=True)
 
 # ===================== IC CAMPAIGN DETAIL =====================
-# def campaign_detail_ic(user: dict, campaign_id: str):
-#     _, campaigns_df, leads_df = load_all_data()
-#     campaign = campaigns_df[campaigns_df['campaign_id'] == campaign_id].iloc[0]
-
-#     st.title(f"📋 {campaign['campaign_name']}")
-#     c1, c2 = st.columns([2, 1])
-#     with c1:
-#         st.write(f"**ประเภท:** {campaign['campaign_type']}")
-#         
-#         st.write(f"**:** {campaign['start_date']} ถึง {campaign['end_date']}")
-#         st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
-
-#     # Leads table for this IC
-#     st.subheader("รายชื่อ Lead")
-#     # my_leads = leads_df[(leads_df['campaign_id'] == campaign_id) & (leads_df['assigned_ic'] == user['username'])].copy()
-
-#     # if my_leads.empty:
-#     #     st.info("ยังไม่มี Lead ใน Campaign นี้")
-#     #     return
-
-#     # display_df = my_leads[['customer_name', 'phone', 'email', 'policy_name', 'maturity_date', 'maturity_amount', 'status', 'priority', 'notes']].copy()
-    
-#     my_leads = leads_df[(leads_df['campaign_id'] == campaign_id) & (leads_df['assigned_ic'] == user['username'])].copy()
-
-#     # ✅ บังคับ dtype ให้เข้ากันกับคอลัมน์แบบ TextColumn
-#     text_cols = ['customer_name', 'phone', 'email', 'policy_name', 'maturity_date', 'notes']
-#     for c in text_cols:
-#         if c in my_leads.columns:
-#             my_leads[c] = my_leads[c].fillna('').astype(str)
-
-#     # (ทางเลือก) ให้คอลัมน์ตัวเลขแน่ใจว่าเป็นตัวเลข เพื่อใช้ NumberColumn ได้
-#     if 'maturity_amount' in my_leads.columns:
-#         my_leads['maturity_amount'] = pd.to_numeric(my_leads['maturity_amount'], errors='coerce')
-
-#     # (ทางเลือก) เติมค่าตั้งต้นให้ status/priority ถ้าว่าง เพื่อให้ selectbox แสดงได้ดี
-#     if 'status' in my_leads.columns:
-#         my_leads['status'] = my_leads['status'].fillna('ยังไม่ติดต่อ')
-#     if 'priority' in my_leads.columns:
-#         my_leads['priority'] = my_leads['priority'].fillna('Medium')
-
-#     # จากนั้นค่อยสร้าง display_df ต่อได้เลย
-#     display_df = my_leads[['customer_name', 'phone', 'email', 'policy_name',
-#                         'maturity_date', 'maturity_amount', 'status',
-#                         'priority', 'notes']].copy()
-
-#     edited_df = st.data_editor(
-#         display_df,
-#         column_config={
-#             'customer_name': st.column_config.TextColumn('ชื่อลูกค้า', disabled=True),
-#             'phone': st.column_config.TextColumn('เบอร์โทร', disabled=True),
-#             'email': st.column_config.TextColumn('อีเมล', disabled=True),
-#             'policy_name': st.column_config.TextColumn('ชื่อกรมธรรม์', disabled=True),
-#             'maturity_date': st.column_config.TextColumn('วันครบกำหนด', disabled=True),
-#             'maturity_amount': st.column_config.NumberColumn('จำนวนเงิน', format='%.0f', disabled=True),
-#             'status': st.column_config.SelectboxColumn('สถานะ', options=['ยังไม่ติดต่อ','ติดต่อแล้ว','ปิดการขายสำเร็จ','รอตัดสินใจ','ไม่สนใจ','ติดต่อไม่ได้']),
-#             'priority': st.column_config.SelectboxColumn('Priority', options=['High','Medium','Low']),
-#             'notes': st.column_config.TextColumn('หมายเหตุ')
-#         },
-#         use_container_width=True,
-#         height=420
-#     )
-
-#     if st.button("บันทึกการเปลี่ยนแปลง", type="primary"):
-#         users_df, campaigns_df, leads_all = load_all_data()
-#         for idx, (lead_id, orig) in enumerate(zip(my_leads['lead_id'], my_leads.itertuples())):
-#             new_status = edited_df.iloc[idx]['status']
-#             new_priority = edited_df.iloc[idx]['priority']
-#             new_notes = edited_df.iloc[idx]['notes']
-#             if (new_status != orig.status) or (new_priority != orig.priority) or (new_notes != str(orig.notes or '')):
-#                 mask = leads_all['lead_id'] == lead_id
-#                 leads_all.loc[mask, 'status'] = new_status
-#                 leads_all.loc[mask, 'priority'] = new_priority
-#                 leads_all.loc[mask, 'notes'] = (new_notes or None) #new_notes
-#                 leads_all.loc[mask, 'updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#                 leads_all.loc[mask, 'last_contact_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-#         save_all_data(users_df, campaigns_df, leads_all)
-#         st.success("บันทึกการเปลี่ยนแปลงสำเร็จ!")
-#         #st.rerun()
-
-#     st.subheader("ดาวน์โหลดรายชื่อ Lead")
-#     csv = my_leads.to_csv(index=False, encoding='utf-8-sig')
-#     st.download_button(label=f"ดาวน์โหลด {campaign['campaign_name']}", data=csv, file_name=f"leads_{campaign['campaign_name']}_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
-
 def campaign_detail_ic(user, campaign_id):
-    # --- helpers ---
+    # -------------------- helpers --------------------
     def _parse_contact_date_time(dt_str):
         """Split last_contact_date 'YYYY-mm-dd HH:MM:SS' -> (date|None, time|None)"""
         if pd.isna(dt_str) or not dt_str:
             return None, None
         try:
-            ts = pd.to_datetime(dt_str)
+            ts = pd.to_datetime(dt_str, errors="coerce")
+            if pd.isna(ts):
+                return None, None
             return ts.date(), ts.time().replace(microsecond=0)
         except Exception:
             return None, None
 
     def _to_date(val):
-        if val is None or (isinstance(val, float) and pd.isna(val)):
+        # robust ต่อ None, NaN, NaT, 'NaT', numpy.datetime64, str
+        if val is None or pd.isna(val):
             return None
         if isinstance(val, pd.Timestamp):
-            return val.date()
+            return None if pd.isna(val) else val.date()
         if isinstance(val, datetime):
             return val.date()
         if isinstance(val, date):
             return val
-        # try parse string
         try:
-            return pd.to_datetime(val).date()
+            ts = pd.to_datetime(val, errors='coerce')
+            return None if pd.isna(ts) else ts.date()
         except Exception:
             return None
 
     def _to_time(val):
-        if val is None or (isinstance(val, float) and pd.isna(val)):
+        # robust ต่อ None, NaN, NaT, 'NaT', datetime.time, Timestamp, str "HH:MM[:SS]"
+        if val is None or pd.isna(val):
             return None
         if isinstance(val, pd.Timestamp):
-            return val.time().replace(microsecond=0)
-        # datetime.time OK
+            return None if pd.isna(val) else val.time().replace(microsecond=0)
         try:
             import datetime as _dt
             if isinstance(val, _dt.time):
                 return val.replace(microsecond=0)
-        except Exception:
-            pass
-        # parse string "HH:MM[:SS]"
-        try:
-            s = str(val)
+            s = str(val).strip()
+            if s.lower() in {"nat", "nan", ""}:
+                return None
             parts = s.split(":")
-            h = int(parts[0]); m = int(parts[1]) if len(parts) > 1 else 0; sec = int(parts[2]) if len(parts) > 2 else 0
-            import datetime as _dt
+            h = int(parts[0])
+            m = int(parts[1]) if len(parts) > 1 else 0
+            sec = int(parts[2]) if len(parts) > 2 else 0
             return _dt.time(hour=h, minute=m, second=sec)
         except Exception:
             return None
@@ -402,7 +321,7 @@ def campaign_detail_ic(user, campaign_id):
         'ติดต่อไม่ได้': '🟪',
     }
 
-    # --- load campaign ---
+    # -------------------- load campaign --------------------
     _, campaigns_df, leads_df = load_all_data()
     campaign = campaigns_df[campaigns_df['campaign_id'] == campaign_id].iloc[0]
 
@@ -411,12 +330,10 @@ def campaign_detail_ic(user, campaign_id):
     colA, colB = st.columns([2, 1])
     with colA:
         st.write(f"**ประเภท:** {campaign['campaign_type']}")
-        # st.write(f"**รายละเอียด:** {campaign['description']}")
-        render_multiline("รายละเอียด:", campaign["description"])
-        st.write(f"**ระยะเวลาติดต่อลูกค้า:** {campaign['start_date']} ถึง {campaign['end_date']}")
-        #st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
+        st.write(f"**รายละเอียด:** {campaign['description']}")
+        st.write(f"**ระยะเวลา:** {campaign['start_date']} ถึง {campaign['end_date']}")
 
-    # --- filter controls ---
+    # -------------------- filters --------------------
     st.markdown("### 🔎 ตัวกรอง")
     f1, f2 = st.columns(2)
     with f1:
@@ -424,7 +341,7 @@ def campaign_detail_ic(user, campaign_id):
     with f2:
         status_filter = st.selectbox("สถานะการติดต่อ", ["ทั้งหมด"] + STATUS_OPTIONS, index=0)
 
-    # --- my leads for this campaign ---
+    # -------------------- my leads (this campaign) --------------------
     my_leads = leads_df[
         (leads_df['campaign_id'] == campaign_id) &
         (leads_df['assigned_ic'] == user['username'])
@@ -444,7 +361,7 @@ def campaign_detail_ic(user, campaign_id):
         st.warning("ไม่พบข้อมูลตามตัวกรองที่เลือก")
         return
 
-    # --- dtype/prepare fields ---
+    # -------------------- prepare fields --------------------
     # text-like columns → strings
     text_cols = ['customer_name', 'phone', 'email', 'policy_name', 'maturity_date', 'notes', 'status', 'priority']
     for c in text_cols:
@@ -455,13 +372,12 @@ def campaign_detail_ic(user, campaign_id):
     if 'maturity_amount' in my_leads.columns:
         my_leads['maturity_amount'] = pd.to_numeric(my_leads['maturity_amount'], errors='coerce')
 
-    # default fallback
+    # defaults
     my_leads['status'] = my_leads['status'].replace('', 'ยังไม่ติดต่อ')
     my_leads['priority'] = my_leads['priority'].replace('', 'Medium')
 
-    # contact date/time columns split from last_contact_date
-    contact_dates = []
-    contact_times = []
+    # split last_contact_date -> date/time editors
+    contact_dates, contact_times = [], []
     for v in my_leads['last_contact_date'].tolist():
         d, t = _parse_contact_date_time(v)
         contact_dates.append(d)
@@ -469,47 +385,40 @@ def campaign_detail_ic(user, campaign_id):
     my_leads['contact_date'] = contact_dates
     my_leads['contact_time'] = contact_times
 
-    # customer code (อ่านง่าย): ใช้ท้าย 8 ตัวของ lead_id
+    # readable customer code (last 8 chars of lead_id)
     my_leads['customer_code'] = my_leads['lead_id'].astype(str).str[-8:].str.upper()
 
-    # Priority display with color
-    my_leads['priority_display'] = my_leads['priority'].apply(
-        lambda p: f"{p} {PRIORITY_EMOJI.get(p, '')}"
-    )
-    # Status colored label (read-only)
-    my_leads['status_label'] = my_leads['status'].apply(
-        lambda s: f"{STATUS_EMOJI.get(s, '')} {s}"
-    )
+    # Priority display + Status label (read-only)
+    my_leads['priority_display'] = my_leads['priority'].apply(lambda p: f"{p} {PRIORITY_EMOJI.get(p, '')}")
+    my_leads['status_label'] = my_leads['status'].apply(lambda s: f"{STATUS_EMOJI.get(s, '')} {s}")
 
-    # --- choose columns by campaign type ---
+    # -------------------- columns by campaign type --------------------
     is_ipo = str(campaign['campaign_type']).strip().upper() == 'IPO'
 
     if is_ipo:
-        # IPO columns
         cols = [
             'customer_code', 'customer_name', 'phone', 'email',
-            'priority_display',      # readonly
-            'status',                # editable dropdown
-            'contact_date',          # editable date
-            'contact_time',          # editable time
-            'notes'                  # editable text
+            'priority_display',
+            'status',
+            'contact_date',
+            'contact_time',
+            'notes'
         ]
     else:
-        # Insurance/Bond/Other columns
         cols = [
             'customer_code', 'customer_name', 'phone', 'email',
             'policy_name', 'maturity_date', 'maturity_amount',
-            'priority_display',      # readonly
-            'status',                # editable dropdown
-            'contact_date',          # editable date
-            'contact_time',          # editable time
-            'notes'                  # editable text
+            'priority_display',
+            'status',
+            'contact_date',
+            'contact_time',
+            'notes'
         ]
 
-    display_df = my_leads[cols + ['lead_id', 'priority']].copy()  # keep lead_id/priority for saving
-    display_df = display_df.set_index('lead_id')  # use lead_id as stable index in editor
+    display_df = my_leads[cols + ['lead_id']].copy()  # keep lead_id for saving
+    display_df = display_df.set_index('lead_id')       # stable index
 
-    # --- data editor config ---
+    # -------------------- editor config --------------------
     column_config = {
         'customer_code': st.column_config.TextColumn("รหัสลูกค้า", disabled=True),
         'customer_name': st.column_config.TextColumn("ชื่อลูกค้า", disabled=True),
@@ -528,7 +437,6 @@ def campaign_detail_ic(user, campaign_id):
             'maturity_amount': st.column_config.NumberColumn("จำนวนเงิน", format="%.0f", disabled=True),
         })
 
-    # hide helper col
     column_order = [c for c in cols if c in display_df.columns]
 
     st.markdown("### รายชื่อ Lead")
@@ -536,104 +444,37 @@ def campaign_detail_ic(user, campaign_id):
         display_df[column_order],
         column_config=column_config,
         use_container_width=True,
-        hide_index=True,  # show lead_id? We set index to lead_id; but they asked 'รหัสลูกค้า' so index can be hidden.
+        hide_index=True,
         num_rows="fixed",
         height=520
     )
 
-    # --- save button ---
-    # if st.button("บันทึกการเปลี่ยนแปลง", type="primary"):
-    #     users_df, campaigns_df, all_leads = load_all_data()
-
-    #     # loop through edited rows by index (lead_id)
-    #     changes = 0
-    #     for lead_id, row in edited_df.iterrows():
-    #         # get original row mask
-    #         mask = all_leads['lead_id'] == lead_id
-    #         if not mask.any():
-    #             continue
-
-    #         # read new values
-    #         new_status = row.get('status')
-    #         new_notes = row.get('notes')
-    #         new_date = _to_date(row.get('contact_date'))
-    #         new_time = _to_time(row.get('contact_time'))
-
-    #         # combine date+time to last_contact_date string
-    #         if new_date is not None:
-    #             if new_time is not None:
-    #                 last_contact_str = f"{new_date.strftime('%Y-%m-%d')} {new_time.strftime('%H:%M:%S')}"
-    #             else:
-    #                 last_contact_str = f"{new_date.strftime('%Y-%m-%d')} 00:00:00"
-    #         else:
-    #             # ถ้าไม่ใส่วัน ให้เว้น last_contact_date ไว้ตามเดิม
-    #             last_contact_str = all_leads.loc[mask, 'last_contact_date'].iloc[0]
-
-    #         # check diffs
-    #         cur_status = str(all_leads.loc[mask, 'status'].iloc[0] or '')
-    #         cur_notes = str(all_leads.loc[mask, 'notes'].iloc[0] or '')
-    #         cur_last_contact = all_leads.loc[mask, 'last_contact_date'].iloc[0]
-
-    #         if (new_status != cur_status) or (str(new_notes or '') != cur_notes) or (last_contact_str != cur_last_contact):
-    #             all_leads.loc[mask, 'status'] = new_status
-    #             all_leads.loc[mask, 'notes'] = (new_notes or None)
-    #             all_leads.loc[mask, 'last_contact_date'] = last_contact_str
-    #             all_leads.loc[mask, 'updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    #             changes += 1
-
-    #     save_all_data(users_df, campaigns_df, all_leads)
-    #     if changes:
-    #         st.success(f"บันทึกการเปลี่ยนแปลงสำเร็จ ({changes} รายการ)")
-    #     else:
-    #         st.info("ไม่มีการเปลี่ยนแปลง")
-    #     st.rerun()
-        # --- save button (with validation rules) ---
+    # -------------------- save button (changed-rows validation) --------------------
     if st.button("บันทึกการเปลี่ยนแปลง", type="primary"):
         users_df, campaigns_df, all_leads = load_all_data()
 
-        # กฎสถานะ
         requires_contact = {'ติดต่อแล้ว', 'ปิดการขายสำเร็จ', 'รอตัดสินใจ', 'ไม่สนใจ', 'ติดต่อไม่ได้'}
         no_contact = {'ยังไม่ติดต่อ'}
 
-        invalid_required = []   # แถวที่ "ต้องมี" วัน/เวลา แต่ขาด
-        invalid_forbidden = []  # แถวที่ "ห้ามมี" วัน/เวลา แต่ดันมี
+        invalid_required = []   # rows that require contact_date but missing it
         changes = 0
 
-        # ใช้ข้อมูลเพื่อรายงานชื่อ/รหัสลูกค้าให้อ่านง่าย
-        # (แกะจาก edited_df ซึ่งมี 'customer_code' อยู่แล้ว)
         def _row_label(lead_id):
             try:
-                code = edited_df.loc[lead_id].get('customer_code', '')
-                name = edited_df.loc[lead_id].get('customer_name', '')
+                row = edited_df.loc[lead_id]
+                code = row.get('customer_code', '')
+                name = row.get('customer_name', '')
                 return f"{code} - {name}".strip(" -")
             except Exception:
                 return str(lead_id)
 
-        # 1) ตรวจ validation ทุกแถวก่อน — ถ้ามีผิดจะไม่บันทึกเลย
-        for lead_id, row in edited_df.iterrows():
-            new_status = str(row.get('status') or '').strip()
-            d = _to_date(row.get('contact_date'))
-            t = _to_time(row.get('contact_time'))
+        def _orig_contact_dt(lead_id):
+            mask = all_leads['lead_id'] == lead_id
+            if not mask.any():
+                return (None, None)
+            return _parse_contact_date_time(all_leads.loc[mask, 'last_contact_date'].iloc[0])
 
-            if new_status in requires_contact:
-                if d is None or t is None: 
-                    invalid_required.append(_row_label(lead_id))
-
-            if new_status in no_contact:
-                # ห้ามมีทั้งวันและเวลา (มีอย่างใดอย่างหนึ่งก็ถือว่าผิด)
-                if (d is not None) or (t is not None):
-                    invalid_forbidden.append(_row_label(lead_id))
-
-        if invalid_required or invalid_forbidden:
-            if invalid_required:
-                st.error("ต้องระบุ 'วันที่ติดต่อ' และ 'เวลาที่ติดต่อ' สำหรับสถานะ: ติดต่อแล้ว/ปิดการขายสำเร็จ/รอตัดสินใจ/ไม่สนใจ/ติดต่อไม่ได้\n"
-                         + "\n• " + "\n\n• ".join(invalid_required))
-            if invalid_forbidden:
-                st.error("สถานะ 'ยังไม่ติดต่อ' ห้ามมี 'วันที่ติดต่อ' และ 'เวลาที่ติดต่อ'\n"
-                         + "\n• " + "\n\n• ".join(invalid_forbidden))
-            st.stop()  # ยุติการบันทึก
-
-        # 2) ผ่าน validation แล้ว — ดำเนินการบันทึก
+        # ✅ validate & save only changed rows
         for lead_id, row in edited_df.iterrows():
             mask = all_leads['lead_id'] == lead_id
             if not mask.any():
@@ -644,27 +485,51 @@ def campaign_detail_ic(user, campaign_id):
 
             d = _to_date(row.get('contact_date'))
             t = _to_time(row.get('contact_time'))
-
-            # รวมวัน+เวลาเพื่อเก็บใน last_contact_date ตามกฎ
-            if new_status in requires_contact:
-                # (ถึงตรงนี้ d/t ต้องไม่ None แล้ว เพราะผ่าน validation)
-                last_contact_str = f"{d.strftime('%Y-%m-%d')} {t.strftime('%H:%M:%S')}"
-            elif new_status in no_contact:
-                last_contact_str = None  # ต้องไม่มี
-            else:
-                # เผื่ออนาคตมีสถานะอื่น ๆ — หากไม่กำหนด ก็คงค่าเดิมไว้
-                last_contact_str = all_leads.loc[mask, 'last_contact_date'].iloc[0]
+            # if only time is provided without date, ignore time
+            if d is None and t is not None:
+                t = None
 
             cur_status = str(all_leads.loc[mask, 'status'].iloc[0] or '')
             cur_notes  = str(all_leads.loc[mask, 'notes'].iloc[0] or '')
-            cur_last   = all_leads.loc[mask, 'last_contact_date'].iloc[0]
+            od, ot     = _orig_contact_dt(lead_id)
 
-            if (new_status != cur_status) or (str(new_notes or '') != cur_notes) or (last_contact_str != cur_last):
-                all_leads.loc[mask, 'status'] = new_status
-                all_leads.loc[mask, 'notes']  = (new_notes or None)
-                all_leads.loc[mask, 'last_contact_date'] = last_contact_str
-                all_leads.loc[mask, 'updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                changes += 1
+            changed = (
+                new_status != cur_status
+                or str(new_notes or '') != cur_notes
+                or d != od
+                or (t or None) != (ot or None)
+            )
+            if not changed:
+                continue  # skip untouched rows
+
+            # --- per-row validation ---
+            if new_status in requires_contact and d is None:
+                invalid_required.append(_row_label(lead_id))
+                continue
+
+            # --- compose last_contact_date & write back ---
+            if new_status in requires_contact:
+                if t is None:
+                    import datetime as _dt
+                    t = _dt.time(0, 0, 0)
+                last_contact_str = f"{d.strftime('%Y-%m-%d')} {t.strftime('%H:%M:%S')}"
+            elif new_status in no_contact:
+                last_contact_str = None  # clear when 'ยังไม่ติดต่อ'
+            else:
+                last_contact_str = all_leads.loc[mask, 'last_contact_date'].iloc[0]
+
+            all_leads.loc[mask, 'status'] = new_status
+            all_leads.loc[mask, 'notes']  = (new_notes or None)
+            all_leads.loc[mask, 'last_contact_date'] = last_contact_str
+            all_leads.loc[mask, 'updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            changes += 1
+
+        if invalid_required:
+            st.error(
+                "ต้องระบุ 'วันที่ติดต่อ' สำหรับสถานะ: ติดต่อแล้ว/ปิดการขายสำเร็จ/รอตัดสินใจ/ไม่สนใจ/ติดต่อไม่ได้\n"
+                + "\n• " + "\n• ".join(invalid_required)
+            )
+            st.stop()
 
         save_all_data(users_df, campaigns_df, all_leads)
         if changes:
@@ -672,6 +537,7 @@ def campaign_detail_ic(user, campaign_id):
         else:
             st.info("ไม่มีการเปลี่ยนแปลง")
         st.rerun()
+
 
 
 
