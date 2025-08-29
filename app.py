@@ -201,6 +201,15 @@ def generate_campaign_id() -> str:
     next_num = (max(numbers) + 1) if numbers else 1
     return f"CAMP-{next_num:03d}"
 
+def render_multiline(label: str, text: str | None):
+    """แสดงข้อความหลายบรรทัดแบบคงบรรทัดตามที่กรอก"""
+    import html
+    s = "" if text is None else str(text)
+    s = s.replace("\r\n", "\n").replace("\r", "\n").strip()
+    safe = html.escape(s).replace("\n", "<br/>")
+    st.markdown(f"**{label}**<br/>{safe}", unsafe_allow_html=True)
+
+
 # ===================== MOCK DATA =====================
 def create_mockup_data():
     users_df, campaigns_df, leads_df = load_all_data()
@@ -550,7 +559,8 @@ def campaign_detail_ic(user, campaign_id):
     colA, colB = st.columns([2, 1])
     with colA:
         st.write(f"**ประเภท:** {campaign['campaign_type']}")
-        st.write(f"**รายละเอียด:** {campaign['description']}")
+        # st.write(f"**รายละเอียด:** {campaign['description']}")
+        render_multiline("รายละเอียด:", campaign["description"])
         st.write(f"**ระยะเวลาติดต่อลูกค้า:** {campaign['start_date']} ถึง {campaign['end_date']}")
         #st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
@@ -1056,7 +1066,8 @@ def manage_campaigns_admin(user: dict):
         for _, campaign in campaigns_df.iterrows():
             with st.expander(f"{campaign['campaign_id']} - {campaign['campaign_name']} ({campaign['campaign_type']})", expanded=False):
                 st.write(f"**Campaign ID:** {campaign['campaign_id']}")
-                st.write(f"**รายละเอียด:** {campaign['description']}")
+                # st.write(f"**รายละเอียด:** {campaign['description']}")
+                render_multiline("รายละเอียด:", campaign["description"])
                 st.write(f"**ระยะเวลาติดต่อลูกค้า:** {campaign['start_date']} ถึง {campaign['end_date']}")
                 #st.write(f"**เป้าหมาย:** {campaign['target_amount']:,.0f} บาท")
 
