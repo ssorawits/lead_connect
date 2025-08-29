@@ -995,7 +995,7 @@ def manage_campaigns_admin(user: dict):
 # ===================== MAIN APP =====================
 def main():
     # Initialize data on first run
-    create_mockup_data()
+    #create_mockup_data()
 
     if 'user' not in st.session_state:
         login_page()
