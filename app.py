@@ -1134,7 +1134,7 @@ def manage_campaigns_admin(user: dict):
                                     except Exception:
                                         pass
                                     st.success("🗑️ ลบ Campaign และ Lead สำเร็จ")
-                                    #st.rerun()
+                                    st.rerun()
                                 else:
                                     st.error("ชื่อ Campaign ไม่ตรงกัน")
                     elif password_input:
