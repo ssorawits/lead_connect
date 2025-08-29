@@ -1114,7 +1114,7 @@ def manage_campaigns_admin(user: dict):
                                 except Exception:
                                     pass
                                 st.success("✅ แก้ไข Campaign สำเร็จ")
-                                #st.rerun()
+                                st.rerun()
 
                         with st.form(key=f"delete_{campaign['campaign_id']}"):
                             st.write("### ลบ Campaign")
