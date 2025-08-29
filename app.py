@@ -671,7 +671,7 @@ def campaign_detail_ic(user, campaign_id):
             st.success(f"บันทึกการเปลี่ยนแปลงสำเร็จ ({changes} รายการ)")
         else:
             st.info("ไม่มีการเปลี่ยนแปลง")
-        # st.rerun()
+        st.rerun()
 
 
 
